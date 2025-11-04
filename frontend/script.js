@@ -22,6 +22,8 @@ async function addMovie() {
         body: JSON.stringify({ title, director })
     });
 
+    //console.log(JSON.stringify({ title, director }))
+
     if (response.ok) {
         const result = await response.json();
         alert("✅ " + result.message);
