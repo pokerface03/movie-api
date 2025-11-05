@@ -22,11 +22,11 @@ async function addMovie() {
         body: JSON.stringify({ title, director })
     });
 
-    //console.log(JSON.stringify({ title, director }))
+    console.log(JSON.stringify({ title, director }))
 
     if (response.ok) {
         const result = await response.json();
-        alert("✅ " + result.message);
+        alert("" + result.message);
 
         // Clear fields
         document.getElementById("movieTitle").value = "";
@@ -35,7 +35,7 @@ async function addMovie() {
         // Refresh movie list
         searchMovies();
     } else {
-        alert("❌ Failed to add movie. Server error.");
+        alert("Failed to add movie. Server error.");
     }
 
     document.getElementById("movieTitle").value = "";
@@ -55,7 +55,7 @@ function displayMovies(movies) {
     movies.forEach(movie => {
         const div = document.createElement("div");
         div.className = "movie-item";
-        div.textContent = `Title:${movie.Title} - Director:${movie.Director}`;
+        div.textContent = `Title:${movie.title} - Director:${movie.director}`;
         container.appendChild(div);
     });
 }
