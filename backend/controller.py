@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import redis
 import os
+import json
 
 app = FastAPI()
 
@@ -23,11 +25,23 @@ db_conn = {
     "port": "5432",
 }
 
+redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
 
 @app.get("/movies")
 def get_movies(director: str = Query("", alias="q")):
     try:
 
+        #redis cache search
+        key = f"movies:{director.lower()}"
+        cached = redis_client.get(key)
+
+        if cached:
+            print("cache hit")
+            return json.loads(cached)
+        else:
+            print("Cache miss — querying PostgreSQL")
+
+        #postgress set up 
         conn = psycopg2.connect(**db_conn)
         cur = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -42,6 +56,10 @@ def get_movies(director: str = Query("", alias="q")):
             raise Exception("director: paramenter not found")
         
         movies = cur.fetchall()
+
+        #result store in redis
+        redis_client.set(key, json.dumps(movies), ex=60)  
+
         print(movies)
         cur.close()
         conn.close()
@@ -76,6 +94,12 @@ def add_movie(movie: dict):
 
         cur.close()
         conn.close()
+
+        #redis clear cache for matched patterns
+        pattern = f"movies:{movie['director'].lower()}*"
+        for key in redis_client.scan_iter(pattern):
+            redis_client.delete(key)
+
 
         return {"message": "Movie added successfully"}
 
