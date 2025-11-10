@@ -18,9 +18,17 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 --decode > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Debug SSH key
+        run: |
+          echo "=== SSH dir ==="
+          ls -la ~/.ssh
+          echo "=== Key content (first lines) ==="
+          head -n 5 ~/.ssh/id_rsa
+
 
       - name: Create .env file
         run: |
