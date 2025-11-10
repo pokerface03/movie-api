@@ -39,7 +39,7 @@
 
 
     - name: Add Docker GPG key
-      ansible.builtin.shell: |
+      shell: |
           set -e
           curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
       args:
