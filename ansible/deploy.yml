@@ -40,11 +40,9 @@
 
     - name: Add Docker GPG key
       shell: |
-        set -e
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
       args:
         creates: /usr/share/keyrings/docker-archive-keyring.gpg
-        warn: false
       when: ansible_os_family == "Debian"
 
     - name: Add Docker repository
