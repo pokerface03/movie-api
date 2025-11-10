@@ -89,6 +89,13 @@
         src: "{{ project_dir }}/databases/init/init.sql"
         dest: /tmp/init.sql
 
+    - name: Copy .env file to EC2
+      copy:
+        src: "{{ playbook_dir }}/.env"
+        dest: "{{ app_dir }}/.env"
+        mode: '0600'
+
+
 
     - name: Start application with Docker Compose over SSH
       become: false
