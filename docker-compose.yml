@@ -2,6 +2,9 @@
 
   services:
     movieAPI:
+      build:
+        context: .        # folder containing your Dockerfile
+        dockerfile: Dockerfile    # optional if named 'Dockerfile'
       image: movie-api:latest
       container_name: movie-api
       env_file: .env
@@ -23,8 +26,7 @@
       expose:
         - "5432"
       volumes:
-        - ./databases/pgdata:/var/lib/postgresql/data
-        - ./databases/init:/docker-entrypoint-initdb.d/
+        - pgdata:/var/lib/postgresql/data
       networks:
         - movie-api-network
 
@@ -34,7 +36,7 @@
       expose:
         - "6379"
       volumes:
-        - ./databases/redisdata/:/data
+        - redisdata:/data
       networks:
         - movie-api-network
 
@@ -43,3 +45,7 @@
     movie-api-network:
       driver: bridge
       internal: false
+      
+  volumes:
+    pgdata:
+    redisdata:
