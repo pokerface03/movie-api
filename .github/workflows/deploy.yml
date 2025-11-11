@@ -8,7 +8,6 @@ on:
       - "config/Prometheus"
   workflow_dispatch:
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
