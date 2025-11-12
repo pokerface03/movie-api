@@ -92,16 +92,14 @@
         dest: "{{ app_dir }}/.env"
         mode: '0600'
 
-    - name: Copy docker-compose file to EC2
-      copy:
-        src: "{{ project_dir }}/docker-compose.yml"
-        dest: "{{ app_dir }}/docker-compose.yml"
-
-    - name: Build and start application with Docker Compose
-      become: no
-      command: docker compose -f docker-compose.yml up -d --build --remove-orphans
+    - name: Start application with Docker Compose over SSH
+      become: false
+      command: docker compose -f docker-compose.yml up
       args:
-        chdir: "{{ app_dir }}"
+        chdir: "{{ project_dir }}"
+      environment:
+        DOCKER_HOST: "ssh://ec2-docker" 
+      delegate_to: localhost
       
     - name: Copy SQL file from EC2 host into container
       command: docker cp /tmp/init.sql postgres:/tmp/init.sql
