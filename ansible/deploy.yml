@@ -109,5 +109,6 @@
 
     - name: Initialize Postgres table
       command: docker exec -i postgres psql -U postgres -d movies_db -f /tmp/init.sql
+      
 
 
