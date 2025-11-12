@@ -103,7 +103,6 @@
       args:
         chdir: "{{ app_dir }}"
       
-
     - name: Copy SQL file from EC2 host into container
       command: docker cp /tmp/init.sql postgres:/tmp/init.sql
 
