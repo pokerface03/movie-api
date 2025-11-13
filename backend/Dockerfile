@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirement.txt .
 RUN pip install --upgrade pip && pip install -r requirement.txt
 
-COPY backend/controller.py .
+COPY controller.py .
 
 EXPOSE 8000
 

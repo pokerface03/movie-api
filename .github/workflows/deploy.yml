@@ -1,16 +1,77 @@
-name: Deploy to EC2
+name: Build & Deploy
 
 on:
   push:
-    branches: 
-      - "main"
-      - "images/ECR"
+    branches:
+      - main
+      - images/ECR
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-backend:
+    if: github.event_name == 'workflow_dispatch' || contains(join(github.event.commits.*.modified, ' '), 'backend/')
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build backend image
+        run: |
+          docker build -t 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:movie-api -f backend/Dockerfile ./backend
+      - name: Push backend image
+        run: |
+          docker push 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:movie-api
 
+  build-frontend:
+    if: github.event_name == 'workflow_dispatch' || contains(join(github.event.commits.*.modified, ' '), 'frontend/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build frontend image
+        run: |
+          docker build -t 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:frontend -f frontend/Dockerfile ./frontend
+      - name: Push frontend image
+        run: |
+          docker push 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:frontend
+
+  build-gateway:
+    if: github.event_name == 'workflow_dispatch' || contains(join(github.event.commits.*.modified, ' '), 'gateway/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build gateway image
+        run: |
+          docker build -t 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:gateway -f gateway/Dockerfile ./gateway
+      - name: Push gateway image
+        run: |
+          docker push 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:gateway
+
+  deploy:
+    needs: [build-backend, build-frontend, build-gateway]
+    runs-on: ubuntu-latest
+    if: always() # Ensures deploy runs even if no images were built
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
