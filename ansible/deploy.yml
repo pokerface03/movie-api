@@ -94,7 +94,7 @@
 
     - name: Start application with Docker Compose over SSH
       become: false
-      command: command: docker compose -f docker-compose.yml pull && docker compose -f docker-compose.yml up -d
+      command: docker compose -f docker-compose.yml pull && docker compose -f docker-compose.yml up -d
       args:
         chdir: "{{ project_dir }}"
       environment:
