@@ -34,13 +34,13 @@ jobs:
     name: Build and Push ${{ matrix.service }} to ECR
     runs-on: ubuntu-latest
 
-    if: ${{ fromJSON('{
-      "backend": "' + needs.detect-changes.outputs.backend + '",
-      "frontend": "' + needs.detect-changes.outputs.frontend + '",
-      "gateway": "' + needs.detect-changes.outputs.gateway + '"
-    }')[matrix.service] == 'true' }}
+    if: |
+      (matrix.service == 'backend' && needs.detect-changes.outputs.backend == 'true') ||
+      (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend == 'true') ||
+      (matrix.service == 'gateway' && needs.detect-changes.outputs.gateway == 'true')
 
     strategy:
+      fail-fast: false 
       matrix:
         service: [backend, frontend, gateway]
         include:
