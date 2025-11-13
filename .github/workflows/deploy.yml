@@ -35,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
 
     if: |
-      (matrix.service == 'backend' && needs.detect-changes.outputs.backend == 'true') ||
-      (matrix.service == 'frontend' && needs.detect-changes.outputs.frontend == 'true') ||
-      (matrix.service == 'gateway' && needs.detect-changes.outputs.gateway == 'true')
+      (${{ matrix.service }} == 'backend' && needs.detect-changes.outputs.backend == 'true') ||
+      (${{ matrix.service }} == 'frontend' && needs.detect-changes.outputs.frontend == 'true') ||
+      (${{ matrix.service }} == 'gateway' && needs.detect-changes.outputs.gateway == 'true')
 
     strategy:
       fail-fast: false 
