@@ -20,7 +20,7 @@ jobs:
       - id: changes
         uses: dorny/paths-filter@v3
         with:
-          base: filters/matrix
+          base: logging/elasticSearch
           filters: |
             backend:
               - 'backend/**'
