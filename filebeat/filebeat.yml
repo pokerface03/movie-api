@@ -1,0 +1,22 @@
+filebeat.inputs:
+  - type: filestream
+    id: backend-logs
+    paths:
+      - /app/logs/*.log
+    parsers:
+      - ndjson:
+          target: ""
+    fields:
+      service: movie-api
+    fields_under_root: true
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+
+setup.kibana:
+  host: "kibana:5601"
+
+processors:
+  - add_host_metadata: ~
+  - add_docker_metadata: ~
+  - add_cloud_metadata: ~

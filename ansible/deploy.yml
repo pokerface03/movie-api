@@ -86,6 +86,14 @@
         src: "{{ project_dir }}/databases/init/init.sql"
         dest: /tmp/init.sql
 
+    - name: create filebeat directory in EC2
+      command: mkdir /opt/myapp/filebeat/
+
+    - name: Copy filebeat.yml file to EC2
+      copy:
+        src: "{{ project_dir }}/filebeat/filebeat.yml"
+        dest: "{{ app_dir }}/filebeat/filebeat.yml"
+
     - name: Copy .env file to EC2
       copy:
         src: "{{ project_dir }}/.env"
