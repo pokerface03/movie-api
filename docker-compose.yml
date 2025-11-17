@@ -90,7 +90,7 @@
       container_name: filebeat
       user: root
       volumes:
-        - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+        - $(pwd)/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
         - backend-logs:/app/logs
       depends_on:
         - elasticsearch
