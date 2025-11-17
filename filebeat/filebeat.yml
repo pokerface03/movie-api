@@ -11,10 +11,10 @@ fields:
 fields_under_root: true
 
 output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
+  hosts: ["http://192.168.45.135:9200"]
 
 setup.kibana:
-  host: "http://kibana:5601"
+  host: "http://192.168.45.135:5601"
 
 processors:
   - add_host_metadata: ~
