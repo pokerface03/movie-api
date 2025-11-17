@@ -120,7 +120,7 @@
         docker compose -f docker-compose.yml pull &&
         docker compose -f docker-compose.yml up -d
       args:
-        chdir: "{{ project_dir }}"
+        chdir: "{{ github.workspace }}"
       environment:
         DOCKER_HOST: "ssh://ec2-docker" 
       delegate_to: localhost
