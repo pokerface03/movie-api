@@ -97,6 +97,37 @@
       networks:
         - movie-api-network
 
+    node-exporter:
+      image: prom/node-exporter
+      container_name: node-exporter
+      ports:
+        - "9100:9100"
+      restart: unless-stopped
+      networks:
+        - movie-api-network
+
+    postgres-exporter:
+      image: prometheuscommunity/postgres-exporter
+      container_name: postgres-exporter
+      environment:
+        - DATA_SOURCE_NAME=${DATA_SOURCE_NAME}
+      ports:
+        - "9187:9187"
+      depends_on:
+        - postgres
+      networks:
+        - movie-api-network
+
+    redis-exporter:
+      image: oliver006/redis_exporter
+      container_name: redis-exporter
+      command: ["--redis.addr=redis:6379"]
+      ports:
+        - "9121:9121"
+      depends_on:
+        - redis
+      networks:
+        - movie-api-network
 
 
   networks:
