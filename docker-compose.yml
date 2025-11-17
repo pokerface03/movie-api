@@ -61,30 +61,6 @@
       networks:
         - movie-api-network
 
-    elasticsearch:
-      image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
-      container_name: elasticsearch
-      environment:
-        - discovery.type=single-node
-        - ES_JAVA_OPTS=-Xms512m -Xmx512m
-        - xpack.security.enabled=false
-      ports:
-        - "9200:9200"
-      volumes:
-        - esdata:/usr/share/elasticsearch/data
-      networks:
-        - movie-api-network
-
-    kibana:
-      image: docker.elastic.co/kibana/kibana:8.12.0
-      container_name: kibana
-      ports:
-        - "5601:5601"
-      depends_on:
-        - elasticsearch
-      networks:
-        - movie-api-network
-
     filebeat:
       image: 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:filebeat
       container_name: filebeat
