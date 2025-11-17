@@ -86,11 +86,10 @@
         - movie-api-network
 
     filebeat:
-      image: docker.elastic.co/beats/filebeat:8.12.0
+      image: 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:filebeat
       container_name: filebeat
       user: root
       volumes:
-        - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
         - backend-logs:/app/logs
       depends_on:
         - elasticsearch
