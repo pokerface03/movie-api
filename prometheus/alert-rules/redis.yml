@@ -1,0 +1,10 @@
+groups:
+  - name: redis-alerts
+    rules:
+      - alert: RedisDown
+        expr: redis_up{job="redis_exporter"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          description: "Redis is DOWN on {{ $labels.instance }}"
