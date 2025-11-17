@@ -67,8 +67,6 @@
       user: root
       volumes:
         - backend-logs:/app/logs
-      depends_on:
-        - elasticsearch
       networks:
         - movie-api-network
 
