@@ -8,10 +8,20 @@ from dotenv import load_dotenv
 import os
 import json
 from logger import get_logger
+from elasticapm.contrib.starlette import ElasticAPM, make_apm_client
 
 logger = get_logger() 
 
 app = FastAPI()
+
+apm_config = {
+    'SERVICE_NAME': 'movie-api',
+    'SERVER_URL': 'http:192.168.1.122//:8200',
+    'ENVIRONMENT': 'production',
+}
+
+apm = make_apm_client(apm_config)
+app.add_middleware(ElasticAPM, client=apm)
 
 app.add_middleware(
     CORSMiddleware,
