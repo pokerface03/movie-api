@@ -16,7 +16,7 @@ app = FastAPI()
 
 apm_config = {
     'SERVICE_NAME': 'movie-api',
-    'SERVER_URL': 'http:192.168.1.122//:8200',
+    'SERVER_URL': os.getenv("APM_HOST"),
     'ENVIRONMENT': 'production',
 }
 
