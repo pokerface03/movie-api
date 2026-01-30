@@ -1,4 +1,4 @@
-# Movie API — Monorepo Overview
+# Movie API — Overview
 
 This repository implements a movie API and related infrastructure components. The repo uses a multi-branch structure where each branch encapsulates a focused area of the project (backend, frontend/gateway, deployment, observability, infra, images, etc.). This README consolidates information across all branches and serves as the canonical entry point for developers and operators.
 
