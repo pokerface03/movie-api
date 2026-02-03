@@ -47,19 +47,18 @@ Architecture overview
   - Database: Postgres (branch present) or MongoDB (if used; update as applicable)
   - Cache: Redis (caching and rate-limiting)
 - Deployment:
-  - Container images built and stored in ECR (images/ECR)
-  - Deployable to Kubernetes (deployment/kubernetes) with Docker builds in deployment/dockerize
-  - Terraform to provision infra (infa/terraform)
+  - Container images built and stored in ECR 
+  - Deployable to Kubernetes with Docker builds in deployment/dockerize
+  - Terraform to provision infra
 - Observability & logging:
-  - Metrics via Prometheus (config/Prometheus)
-  - Alerts via Alertmanager (logging/alertmanager)
-  - Centralized logging with Logstash/Elasticsearch (APM/Logstash & logging/elasticSearch)
+  - Metrics via Prometheus 
+  - Alerts via Alertmanager 
+  - Centralized logging with Logstash/Elasticsearch 
 
 Features
 - RESTful API: CRUD operations for movies
-- Filtering and matrix-based search (filters/matrix)
+- Filtering and matrix-based search 
 - Pagination and sorting
-- Optional authentication (JWT hooks can be applied)
 - Logging, metrics, and alerting built into infra branches
 - Containerized builds and K8s manifests for production-grade deployments
 
@@ -72,26 +71,31 @@ Prerequisites
 - Terraform (if deploying infra from repo)
 - A database: Postgres and/or Redis (local or remote)
 
-Local development (generic)
+Local development
 1. Clone the repository:
    ```bash
    git clone https://github.com/pokerface03/movie-api.git
    cd movie-api
    ```
-2. Checkout the backend implementation branch if present:
+2. Create a virtual invironment and Install dependencies:
    ```bash
-   git checkout backend/restAPI
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
    ```
-3. Install dependencies and run:
+
+3. Set up postgreSQL and redis
+   
+6. Configure environment variables (see below).
+   
+7. Run application locally:
    ```bash
-   npm install
-   npm run dev
-   # or the project-specific commands in backend/restAPI
+   uvicorn controller:app --host 0.0.0.0 --port 8000
    ```
-4. Configure environment variables (see below).
+8. Access application through frontend(see script.js on branch database/redis)
 
 Docker
-- Build the image (branch: deployment/dockerize or images/ECR):
+- Build the image:
   ```bash
   docker build -t movie-api:latest .
   ```
@@ -104,7 +108,7 @@ Kubernetes
 - minikube was used for the deployment of kubernetes 
 
 Environment variables (example)
-Create a `.env` with the variables the service expects. Replace values according to the branch-specific implementation (backend/restAPI).
+Create a `.env` with the variables the service expects.
 ```
 PORT=3000
 NODE_ENV=development
@@ -115,30 +119,20 @@ LOG_LEVEL=info
 ```
 
 Databases and caching
-- PostgreSQL: migrations and schema in `database/postgress` branch
-- Redis: caching patterns and configuration present in `database/redis`
-- If your backend uses a different DB (MongoDB), update DATABASE_URL accordingly and provide migration scripts if needed
+- PostgreSQL: initialization script in `databases/init`
+- Redis: caching implementation on `backend/controller.py`
 
 Observability and logging
-- Prometheus configs and scrape rules: `config/Prometheus`
-- Alerting rules and Alertmanager config: `logging/alertmanager`
-- Centralized logging and pipelines: `APM/Logstash` and `logging/elasticSearch`
+- Prometheus configs and alert rules: `/Prometheus`
+- Alertmanager config: `/alertmanager`
+- Centralized logging and pipelines: `/filebeat`
 
 CI/CD and images
-- CI/CD definitions (pipelines) live in the `CI/CD` branch
-- Container images and ECR push scripts: `images/ECR`
-- Typical pipeline steps:
-  - Lint & test
-  - Build docker image and push to ECR
-
+- CI/CD definitions (pipelines) and images creation live in the .github workflows
 
 Branch-specific notes
 - Many branch READMEs are placeholders. Use this consolidated README as the main reference;
 
-How to find branch-level docs and artifacts
-- To view a branch in GitHub: https://github.com/pokerface03/movie-api/tree/<branch-name>
-- Example: Prometheus config on branch `config/Prometheus`:
-  https://github.com/pokerface03/movie-api/tree/config/Prometheus
 
 
 
