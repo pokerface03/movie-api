@@ -1,8 +1,8 @@
 # Movie API — Overview
 
-This repository implements a movie API and related infrastructure components. The repo uses a multi-branch structure where each branch encapsulates a focused area of the project (backend, frontend/gateway, deployment, observability, infra, images, etc.). This README consolidates information across all branches and serves as the canonical entry point for developers and operators.
+This repository implements a movie API and related infrastructure components. The repo uses a multi-branch structure where each branch encapsulates a focused area of the project (backend, frontend/gateway, deployment, observability, infra, images, etc.). This README serves as the canonical entry point for developers and operators.
 
-Last updated: 2026-01-30
+Last updated: 2026-02-03
 Author: pokerface03 
 
 Table of contents
@@ -19,10 +19,10 @@ Table of contents
 
 
 Project summary
-This repository contains a RESTful Movie API service along with infrastructure-as-code, observability and deployment tooling. The repo is organized as a monorepo-like collection of branches that focus development and documentation on a single concern per branch (for example, `deployment/kubernetes` holds k8s cluster configuration, `infa/terraform` has terraform modules, etc.).
+This repository contains a RESTful Movie API service along with infrastructure-as-code, observability and deployment tooling. The repo is organized as a collection of branches that focus development and documentation on a single concern per branch (for example, `deployment/kubernetes` holds k8s cluster configuration, `infa/terraform` has terraform modules, etc.) and then merged on the main branch, were is the final version of the project.
 
 Branch layout and purpose
-(Branches discovered in the repository — use these names to find branch-specific content or artifacts)
+(Branches discovered in the repository — use these names to find branch-specific content or artifacts developed)
 - APM/Logstash — logging pipeline and Logstash configuration
 - CI/CD — continuous integration and deployment pipeline definitions
 - backend/restAPI — backend service implementation (API)
