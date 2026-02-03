@@ -7,8 +7,21 @@ import redis
 from dotenv import load_dotenv
 import os
 import json
+from logger import get_logger
+from elasticapm.contrib.starlette import ElasticAPM, make_apm_client
+
+logger = get_logger() 
 
 app = FastAPI()
+
+apm_config = {
+    'SERVICE_NAME': 'movie-api',
+    'SERVER_URL': os.getenv("APM_HOST"),
+    'ENVIRONMENT': 'production',
+}
+
+apm = make_apm_client(apm_config)
+app.add_middleware(ElasticAPM, client=apm)
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,16 +55,17 @@ redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=Tr
 @app.get("/movies")
 def get_movies(director: str = Query("", alias="q")):
     try:
+        logger.info(f"GET /movies?q={director}")
 
         #redis cache search
         key = f"movies:{director.lower()}"
         cached = redis_client.get(key)
 
         if cached:
-            print("cache hit")
+            logger.info(f"CACHE HIT for director={director}")
             return json.loads(cached)
         else:
-            print("Cache miss — querying PostgreSQL")
+            logger.info(f"CACHE MISS for director={director}")
 
         #postgress set up 
         conn = psycopg2.connect(**db_conn)
@@ -76,20 +90,25 @@ def get_movies(director: str = Query("", alias="q")):
         cur.close()
         conn.close()
 
+        logger.info(f"CACHE MISS for director={director}")
+
         return movies
     
     except Exception as e:
+        logger.error(f"Error in get_movies: {str(e)}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 @app.post("/movies")
 def add_movie(movie: dict):
     try:
+        logger.info(f"POST /movies body={movie}")
 
         conn = psycopg2.connect(**db_conn)
         cur = conn.cursor()
         
         if "title" not in movie or "director" not in movie:
+            logger.warning("Invalid payload")
             return JSONResponse(
                 status_code=400,
                 content={"error": "Missing required keys: 'title' and/or 'director'"}
@@ -112,8 +131,10 @@ def add_movie(movie: dict):
         for key in redis_client.scan_iter(pattern):
             redis_client.delete(key)
 
+        logger.info("Movie added successfully")
 
         return {"message": "Movie added successfully"}
 
     except Exception as e:
+        logger.error(f"Error in add_movie: {str(e)}")
         return JSONResponse(status_code=500, content={"error": str(e)})

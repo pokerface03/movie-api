@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movieapi-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movieapi
+  template:
+    metadata:
+      labels:
+        app: movieapi
+    spec:
+      containers:
+        - name: movieapi
+          image: 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:movie-api
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: movieapi-config
+            - secretRef:
+                name: movieapi-secret
+          volumeMounts:
+            - mountPath: /app/logs
+              name: backend-logs
+      imagePullSecrets:
+        - name: ecr-secret
+      volumes:
+        - name: backend-logs
+          persistentVolumeClaim:
+            claimName: backend-logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: movieapi-service
+spec:
+  selector:
+    app: movieapi
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

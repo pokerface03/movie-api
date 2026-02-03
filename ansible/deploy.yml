@@ -86,28 +86,54 @@
         src: "{{ project_dir }}/databases/init/init.sql"
         dest: /tmp/init.sql
 
+    - name: Ensure filebeat directory exists
+      file:
+        path: /opt/myapp/filebeat
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copy filebeat.yml file to EC2
+      copy:
+        src: "{{ project_dir }}/filebeat/filebeat.yml"
+        dest: "{{ app_dir }}/filebeat/filebeat.yml"
+
     - name: Copy .env file to EC2
       copy:
         src: "{{ project_dir }}/.env"
         dest: "{{ app_dir }}/.env"
         mode: '0600'
 
-
+    - name: Stop running containers
+      become: false
+      shell: docker compose -f docker-compose.yml down --remove-orphans
+      args:
+        chdir: "{{ project_dir }}"
+      environment:
+        DOCKER_HOST: "ssh://ec2-docker"
+      delegate_to: localhost
 
     - name: Start application with Docker Compose over SSH
       become: false
-      command: docker compose -f docker-compose.yml up -d --build
+      shell: |
+        docker compose -f docker-compose.yml pull &&
+        docker compose -f docker-compose.yml up -d
       args:
         chdir: "{{ project_dir }}"
       environment:
         DOCKER_HOST: "ssh://ec2-docker" 
       delegate_to: localhost
+      async: 600   # 10 minutes
+      poll: 5
 
+      
     - name: Copy SQL file from EC2 host into container
       command: docker cp /tmp/init.sql postgres:/tmp/init.sql
 
 
     - name: Initialize Postgres table
       command: docker exec -i postgres psql -U postgres -d movies_db -f /tmp/init.sql
+
 
 

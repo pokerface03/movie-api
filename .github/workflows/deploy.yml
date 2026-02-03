@@ -1,16 +1,100 @@
-name: Deploy to EC2
+name: Build & Deploy
 
 on:
   push:
-    branches: 
-      - "main"
-      - "CI/CD"
+    branches:
+      - main
+      - logging/alertmanager
   workflow_dispatch:
 
 jobs:
-  deploy:
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+      gateway: ${{ steps.changes.outputs.gateway }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          base: logging/elasticSearch
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+            gateway:
+              - 'gateway/**'
+
+
+  build-and-push:
+    needs: detect-changes
+    name: Build and Push ${{ matrix.service }} to ECR
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false 
+      matrix:
+        service: [backend, frontend, gateway]
+        include:
+          - service: backend
+            context: ./backend
+            dockerfile: ./backend/Dockerfile
+            image: movie-api
+            changed: ${{ needs.detect-changes.outputs.backend }}
+          - service: frontend
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile
+            image: frontend
+            changed: ${{ needs.detect-changes.outputs.frontend }}
+          - service: gateway
+            context: ./gateway
+            dockerfile: ./gateway/Dockerfile
+            image: gateway
+            changed: ${{ needs.detect-changes.outputs.gateway }}
+
+
+    steps:
+
+      - name: Skip if no changes
+        if: matrix.changed != 'true'
+        run: |
+          echo "No changes detected for ${{ matrix.service }}, skipping build"
+          exit 0
+
+      - name: Checkout code
+        if: matrix.changed == 'true'
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        if: matrix.changed == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1   # change to your AWS region
+
+      - name: Log in to Amazon ECR
+        if: matrix.changed == 'true'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Image to ECR
+        if: matrix.changed == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPO_NAME: movie_api
+        run: |
+          docker build -t $ECR_REGISTRY/$REPO_NAME:${{matrix.image}} -f ${{ matrix.dockerfile }} ${{ matrix.context }}
+          docker push $ECR_REGISTRY/$REPO_NAME:${{matrix.image}}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: always() # Ensures deploy runs even if no images were built
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,6 +119,18 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+          echo "DATA_SOURCE_NAME=${{ secrets.DATA_SOURCE_NAME }}" >> .env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Install Ansible
         run: |

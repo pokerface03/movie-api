@@ -1,22 +1,43 @@
-  version: "3.9"
 
   services:
     movieAPI:
-      build:
-        context: .        # folder containing your Dockerfile
-        dockerfile: Dockerfile    # optional if named 'Dockerfile'
-      image: movie-api:latest
-      container_name: movie-api
+      image: 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:movie-api
+      container_name: movieAPI
       env_file: .env
-      ports:
-        - "8000:8000"
+      expose:
+        - "8000"
       depends_on:
-        - db
+        - postgres
         - redis
       networks:
         - movie-api-network
+      volumes:
+        - backend-logs:/app/logs
 
-    db:
+        
+    frontend:
+      image: 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:frontend
+      container_name: frontend
+      expose:
+        - "8082"
+      depends_on:
+        - movieAPI
+      networks:
+        - movie-api-network
+
+    gateway:
+      image: 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:gateway
+      container_name: gateway
+      ports:
+        - "80:80"
+      depends_on:
+        - movieAPI
+        - frontend
+      networks:
+        - movie-api-network
+
+
+    postgres:
       image: postgres:15
       container_name: postgres
       environment:
@@ -40,6 +61,47 @@
       networks:
         - movie-api-network
 
+    filebeat:
+      image: 620914207029.dkr.ecr.eu-west-1.amazonaws.com/movie_api:filebeat
+      container_name: filebeat
+      user: root
+      volumes:
+        - backend-logs:/app/logs
+      networks:
+        - movie-api-network
+
+    node-exporter:
+      image: prom/node-exporter
+      container_name: node-exporter
+      ports:
+        - "9100:9100"
+      restart: unless-stopped
+      networks:
+        - movie-api-network
+
+    postgres-exporter:
+      image: prometheuscommunity/postgres-exporter
+      container_name: postgres-exporter
+      environment:
+        - DATA_SOURCE_NAME=${DATA_SOURCE_NAME}
+      ports:
+        - "9187:9187"
+      depends_on:
+        - postgres
+      networks:
+        - movie-api-network
+
+    redis-exporter:
+      image: oliver006/redis_exporter
+      container_name: redis-exporter
+      command: ["--redis.addr=redis:6379"]
+      ports:
+        - "9121:9121"
+      depends_on:
+        - redis
+      networks:
+        - movie-api-network
+
 
   networks:
     movie-api-network:
@@ -49,3 +111,5 @@
   volumes:
     pgdata:
     redisdata:
+    backend-logs:
+    esdata:

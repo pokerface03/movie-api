@@ -1,0 +1,20 @@
+global:
+  resolve_timeout: 5m
+
+route:
+    group_by: [Alertname]
+    group_interval: 30s
+    repeat_interval: 30s
+    # Send all notifications to me.
+    receiver: email-me
+
+receivers:
+- name: email-me
+  email_configs:
+  - send_resolved: true
+    to: fparmakli@convertgroup.com
+    from: fparmakli@convertgroup.com
+    smarthost: smtp.gmail.com:587
+    auth_username: fparmakli@convertgroup.com
+    auth_identity: fparmakli@convertgroup.com
+    auth_password: fpum gseh ftoa uxgp 

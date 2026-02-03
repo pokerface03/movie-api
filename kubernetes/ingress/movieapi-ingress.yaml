@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: movie-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2  
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: movie.local
+      http:
+        paths:
+          - path: /movie(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: movieapi-service
+                port:
+                  number: 8000
+
+

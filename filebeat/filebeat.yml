@@ -1,0 +1,26 @@
+filebeat.inputs:
+  - type: filestream
+    id: backend-logs
+    paths:
+      - /app/logs/*.log
+    json.keys_under_root: false   # your logs are NOT JSON
+    json.add_error_key: true
+
+fields:
+  service.name: movie-api
+fields_under_root: true
+
+output.elasticsearch:
+  hosts: ["http://192.168.47.199:9200"]
+
+setup.kibana:
+  host: "http://192.168.47.199:5601"
+
+processors:
+  - add_host_metadata: ~
+  - add_docker_metadata: ~
+  - add_cloud_metadata: ~
+
+logging.level: debug
+logging.selectors: ["publish", "elasticsearch"]
+

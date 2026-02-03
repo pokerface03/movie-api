@@ -1,5 +1,5 @@
 backend/movies.csv
 venv
 .env
-
+ec2-tofu/.terraform
 

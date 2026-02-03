@@ -1,4 +1,4 @@
-const API_URL = "http://172.31.20.60:8000/movies";
+const API_URL = window.location.origin + '/movie/movies';
 
 document.getElementById("searchBtn").addEventListener("click", searchMovies);
 document.getElementById("addBtn").addEventListener("click", addMovie);
